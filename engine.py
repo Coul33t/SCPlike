@@ -2,6 +2,7 @@ import libtcodpy as libtcod
 from input_handler import handle_keys
 from entity import Entity
 from map_objects.game_map import GameMap
+from fov_functions import initiliase_fov, recompute_fov
 from rendering import render_all, clear_all
 from colours import *
 
@@ -17,6 +18,10 @@ def main():
     room_max_size = 10
     room_min_size = 6
     max_rooms = 30
+
+    fov_algorithm = 0
+    fov_light_walls = True
+    fov_radius = 10
 
     player = Entity(int(screen_width / 2), int(screen_height / 2), '@', libtcod.white)
     npc = Entity(int(screen_width / 2 - 5), int(screen_height / 2), 'O', libtcod.yellow)
@@ -34,10 +39,18 @@ def main():
     key = libtcod.Key()
     mouse = libtcod.Mouse()
 
+    fov_map = initiliase_fov(game_map)
+    fov_recompute = True
+
     while not libtcod.console_is_window_closed():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
 
-        render_all(con, entities, game_map, screen_width, screen_height, colours)
+        if fov_recompute:
+            recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
+
+        render_all(con, entities, game_map, fov_map, fov_recompute, screen_width, screen_height, colours)
+
+        fov_recompute = False
 
         libtcod.console_flush()
 
@@ -49,6 +62,7 @@ def main():
             dx, dy = action.get('move')
             if not game_map.is_blocked(player.x + dx, player.y + dy):
                 player.move(dx, dy)
+                fov_recompute = True
 
         if action.get('exit'):
             return True
