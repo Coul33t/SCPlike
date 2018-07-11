@@ -3,6 +3,12 @@ from random import randint
 from map_objects.tile import Tile
 from map_objects.rectangle import Rect
 
+from monsters import get_monster
+
+import pdb
+
+MONSTER_PROB = {'maintenance': [0, 80], 'guard': [80,100]}
+
 class GameMap:
     def __init__(self, width, height):
         self.width = width
@@ -29,6 +35,49 @@ class GameMap:
         for y in range(min(y1, y2), max(y1, y2) + 1):
             self.tiles[x][y].blocked = False
             self.tiles[x][y].block_sight = False
+
+
+    def select_entity(self, prob, x, y):
+        rand = randint(0, 100)
+
+        for k, v in prob.items():
+            if v[0] <= rand < v[1]:
+                return get_monster(k, x, y)
+
+    def place_entity(self, x, y, entity, entities):
+        if not any([en for en in entities if x == en.x and y == en.y]):
+            entities.append(entity)
+            return True
+        
+        return False
+
+    def populate_room(self, room, entities, max_monster):
+        nb = randint(0, max_monster)
+
+        if nb == 0:
+            return
+
+        succesful = 0
+
+        # 100 try in total
+        for _ in range(1000):
+            x = randint(room.x1 + 1, room.x2 - 1)
+            y = randint(room.y1 + 1, room.y2 - 1)
+            
+            entity = self.select_entity(MONSTER_PROB, x, y)
+
+            if self.place_entity(x, y, entity, entities):
+                succesful += 1
+
+            if succesful == nb:
+                break
+
+        print(len(entities))
+
+    def populate_dungeon(self, entities):
+        for room in self.rooms:
+            self.populate_room(room, entities, 2)
+
 
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player):
         self.rooms = []
