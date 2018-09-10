@@ -13,6 +13,6 @@ class Fighter:
 
         if dmg > 0:
             target.fighter.take_damage(dmg)
-            print(f'{self.owner.name} attacks the {target.name} for {dmg} damage!')
+            print(f' The {self.owner.name} attacks the {target.name} for {dmg} damage!')
         else:
             print(f'The {self.owner.name} attacks does no damage to the {target.name}.')
