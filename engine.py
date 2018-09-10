@@ -74,7 +74,7 @@ def main():
                 else:
                     player.move(dx, dy)
                     fov_recompute = True
-            
+
                 game_state = GameStates.ENEMY_TURN
 
         if action.get('exit'):
