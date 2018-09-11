@@ -13,6 +13,8 @@ class BasicAi:
         return hypot(p.x - self.owner.x, p.y - self.owner.y)
 
     def take_turn(self, target, fov_map, game_map, entities):
+        results = []
+
         if self.search_radius >= self.dst(target):
             m = self.owner
 
@@ -21,16 +23,17 @@ class BasicAi:
                     self.last_seen_player = (target.x, target.y)
 
                 if self.dst(target) >= 2:
-                    print(f'Move astar from {m.x}, {m.y}')
                     m.move_astar(target, fov_map, game_map, entities)
 
                 else:
-                    m.fighter.attack(target)
+                    atk_res = m.fighter.attack(target)
+                    results.extend(atk_res)
 
             else:
+                # If the player has been seen as a position in the few last turns,
+                # the monster goes there
                 if self.last_seen_player != (None, None):
-                    print(f'last seen: {self.last_seen_player[0]}, {self.last_seen_player[1]}')
-                    print(f'current coordinates: {m.x}, {m.y}')
                     new_target = Entity('PLACEHOLDER ENTITY', self.last_seen_player[0], self.last_seen_player[1], '0', libtcod.black)
                     m.move_astar(new_target, fov_map, game_map, entities)
-                    print(f'new coordinates: {m.x}, {m.y}')
+
+        return results

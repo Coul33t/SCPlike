@@ -1,10 +1,11 @@
 import libtcodpy as libtcod
 from math import hypot
-import pdb
+
+from rendering import RenderOrder
 
 class Entity:
 
-    def __init__(self, name, x, y, char, colour, blocks=True, is_player=False, fighter=None, ai=None):
+    def __init__(self, name, x, y, char, colour, blocks=True, render_order=RenderOrder.ACTOR, is_player=False, fighter=None, ai=None):
         self.name = name
         self.x = x
         self.y = y
@@ -13,6 +14,8 @@ class Entity:
         self.blocks = blocks
 
         self.is_player = is_player
+
+        self.render_order = render_order
 
         self.fighter = fighter
         if self.fighter:
@@ -93,7 +96,6 @@ class Entity:
         else:
             #Keep the old move function as a backup so that if there are no paths (for example another monster blocks a corridor)
             #it will still try to move towards the player (closer to the corridor opening)
-            print(f'move towards (target {target.x}, {target.y})')
             self.move_towards(target, game_map, entities)
 
         #Delete the path to free memory
