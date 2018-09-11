@@ -41,15 +41,20 @@ class GameMap:
         rand = randint(0, 100)
 
         for k, v in prob.items():
-            if v[0] <= rand < v[1]:
+            if v[0] <= rand <= v[1]:
                 return get_monster(k, x, y)
 
     def place_entity(self, x, y, entity, entities):
-        if not any([en for en in entities if x == en.x and y == en.y]):
-            entities.append(entity)
-            return True
+        if entities:
+            if not any([en for en in entities if x == en.x and y == en.y]):
+                entities.append(entity)
+                return True
+            
+            return False
         
-        return False
+        entities.append(entity)
+        return True
+
 
     def populate_room(self, room, entities, max_monster):
         nb = randint(0, max_monster)
@@ -71,8 +76,6 @@ class GameMap:
 
             if succesful == nb:
                 break
-
-        print(len(entities))
 
     def populate_dungeon(self, entities):
         for room in self.rooms:
