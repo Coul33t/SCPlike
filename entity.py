@@ -1,11 +1,11 @@
 import libtcodpy as libtcod
-from math import hypot
 
 from rendering import RenderOrder
 
 class Entity:
 
-    def __init__(self, name, x, y, char, colour, blocks=True, render_order=RenderOrder.ACTOR, is_player=False, fighter=None, ai=None):
+    def __init__(self, name, x, y, char, colour, blocks=True, render_order=RenderOrder.ACTOR, is_player=False, 
+                fighter=None, ai=None, item=None, inventory=None):
         self.name = name
         self.x = x
         self.y = y
@@ -25,13 +25,18 @@ class Entity:
         if self.ai:
             self.ai.owner = self
 
+        self.item = item
+        if self.item:
+            self.item.owner = self
+
+        self.inventory = inventory
+        if self.inventory:
+            self.inventory.owner = self
+
 
     def move(self, dx, dy):
         self.x += dx
         self.y += dy
-
-    def dst(self, x, y):
-        return hypot(x - self.x, y - self.y)
 
     def move_towards(self, target, game_map, entities):
         dx = (target.x - self.x)
@@ -89,6 +94,7 @@ class Entity:
         if not libtcod.path_is_empty(my_path) and libtcod.path_size(my_path) < 10:
             #Find the next coordinates in the computed full path
             x, y = libtcod.path_walk(my_path, True)
+            
             if x or y:
                 #Set self's coordinates to the next path tile
                 self.x = x
@@ -103,7 +109,7 @@ class Entity:
 
 def is_blocked_by_entity(x, y, entities):
     for en in entities:
-        if en.x == x and en.y ==y :
+        if en.x == x and en.y == y and en.blocks:
             return en
 
     return None

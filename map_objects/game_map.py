@@ -3,9 +3,10 @@ from random import randint
 from map_objects.tile import Tile
 from map_objects.rectangle import Rect
 
-from monsters import get_monster
+from map_objects.monsters_def import get_monster
+from map_objects.items_def import get_item
 
-import pdb
+from rendering import RenderOrder
 
 MONSTER_PROB = {'maintenance': [0, 80], 'guard': [80,100]}
 
@@ -56,10 +57,10 @@ class GameMap:
         return True
 
 
-    def populate_room(self, room, entities, max_monster):
-        nb = randint(0, max_monster)
+    def populate_room(self, room, entities, max_monsters):
+        nb_monsters = randint(0, max_monsters)
 
-        if nb == 0:
+        if nb_monsters == 0:
             return
 
         succesful = 0
@@ -74,12 +75,34 @@ class GameMap:
             if self.place_entity(x, y, entity, entities):
                 succesful += 1
 
-            if succesful == nb:
+            if succesful == nb_monsters:
+                break
+
+    def place_items(self, room, entities, max_items):
+        nb_items = randint(0, max_items)
+
+        if nb_items == 0:
+            return
+
+        succesful = 0
+
+        # 100 try in total
+        for _ in range(1000):
+            x = randint(room.x1 + 1, room.x2 - 1)
+            y = randint(room.y1 + 1, room.y2 - 1)
+            
+            entity = get_item('Healing Potion', x, y)
+
+            if self.place_entity(x, y, entity, entities):
+                succesful += 1
+
+            if succesful == nb_items:
                 break
 
     def populate_dungeon(self, entities):
         for room in self.rooms:
-            self.populate_room(room, entities, 2)
+            self.populate_room(room, entities, 4)
+            self.place_items(room, entities, 2)
 
 
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player):

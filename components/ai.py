@@ -2,27 +2,27 @@ import libtcodpy as libtcod
 from math import hypot
 from entity import Entity
 
+from tools import dst_entities
+
 import pdb
 
 class BasicAi:
     def __init__(self, search_radius=10):
         self.search_radius = search_radius
         self.last_seen_player = (None, None)
-
-    def dst(self, p):
-        return hypot(p.x - self.owner.x, p.y - self.owner.y)
+        self.owner = None
 
     def take_turn(self, target, fov_map, game_map, entities):
         results = []
 
-        if self.search_radius >= self.dst(target):
+        if self.search_radius >= dst_entities(self.owner, target):
             m = self.owner
 
             if libtcod.map_is_in_fov(fov_map, m.x, m.y):
                 if target.is_player:
                     self.last_seen_player = (target.x, target.y)
 
-                if self.dst(target) >= 2:
+                if dst_entities(self.owner, target) >= 2:
                     m.move_astar(target, fov_map, game_map, entities)
 
                 else:
