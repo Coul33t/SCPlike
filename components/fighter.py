@@ -31,3 +31,6 @@ class Fighter:
            results.append({'message': Message(f'The {self.owner.name} attacks does no damage to the {target.name}.')})
 
         return results
+
+    def heal(self, amount):
+        self.hp = min(self.max_hp, self.hp + amount)

@@ -44,7 +44,7 @@ def main():
 
     fighter_comp = Fighter(20, 5, 5)
     inventory_comp = Inventory(10)
-    player = Entity('Player', int(screen_width / 2), int(screen_height / 2), '@', libtcod.white, 
+    player = Entity('Player', int(screen_width / 2), int(screen_height / 2), '@', libtcod.white,
                     is_player=True, fighter=fighter_comp, inventory=inventory_comp)
 
     entities = [player]
@@ -87,7 +87,7 @@ def main():
 
         clear_all(con, entities)
 
-        action = handle_keys(key)
+        action = handle_keys(key, game_state)
 
         player_turn_results = []
 
@@ -121,6 +121,14 @@ def main():
             previous_game_state = game_state
             game_state = GameStates.SHOW_INVENTORY
 
+        if (action.get('inventory_index')
+            and previous_game_state != game_state.PLAYER_DEAD
+            and  player.inventory.items):
+
+            item = player.inventory.items[action.get('inventory_index')]
+            player_turn_results.extend(player.inventory.use(item))
+
+
         if action.get('exit'):
             if game_state == GameStates.SHOW_INVENTORY:
                 game_state = previous_game_state
@@ -134,6 +142,7 @@ def main():
             message = p_turn_res.get('message')
             dead_entity = p_turn_res.get('dead')
             item_added  = p_turn_res.get('item_added')
+            item_consumed = p_turn_res.get('consumed')
 
             if message:
                 message_log.add_message(message)
@@ -143,11 +152,14 @@ def main():
                     message, game_state = kill_player(dead_entity)
                 else:
                     message = kill_monster(dead_entity)
-                
+
                 message_log.add_message(message)
 
             if item_added:
                 entities.remove(item_added)
+                game_state = GameStates.ENEMY_TURN
+
+            if item_consumed:
                 game_state = GameStates.ENEMY_TURN
 
         if game_state == GameStates.ENEMY_TURN:
@@ -167,12 +179,12 @@ def main():
                                 message, game_state = kill_player(dead_entity)
                             else:
                                 message = kill_monster(dead_entity)
-                            
+
                             message_log.add_message(message)
 
                             if game_state == GameStates.PLAYER_DEAD:
                                 break
-                    
+
                     if game_state == GameStates.PLAYER_DEAD:
                         break
             else:
