@@ -32,7 +32,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
     libtcod.console_print_ex(panel, int(x + total_width / 2), y, libtcod.BKGND_NONE, libtcod.CENTER,
                              f'{name}: {value}/{maximum}')
 
-def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, 
+def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log,
                screen_width, screen_height, bar_width, panel_height, panel_y, mouse, colours,
                game_state):
 
@@ -47,9 +47,9 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
                         libtcod.console_set_char_background(con, x, y, colours.get('light_wall'), libtcod.BKGND_SET)
                     else:
                         libtcod.console_set_char_background(con, x, y, colours.get('light_ground'), libtcod.BKGND_SET)
-                
+
                     game_map.tiles[x][y].explored = True
-                    
+
                 elif game_map.tiles[x][y].explored:
                     if wall:
                         libtcod.console_set_char_background(con, x, y, colours.get('dark_wall'), libtcod.BKGND_SET)
@@ -85,11 +85,15 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
                              get_names_under_mouse(mouse, entities, fov_map))
 
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
-    ############################ Status panel ############################
+    ############################ Inventory panel ############################
 
-    if game_state == GameStates.SHOW_INVENTORY:
-        inventory_menu(con, 'Press the key next to an item to use it, or Esc to cancel.\n',
-                       player.inventory, 50, screen_width, screen_height)
+    if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
+        inventory_header = 'Press the key next to an item to use it, or Esc to cancel.\n'
+        if game_state == GameStates.DROP_INVENTORY:
+            inventory_header = 'Press the key next to an item to drop it, or Esc to cancel.\n'
+
+        inventory_menu(con, inventory_header, player.inventory, 50, screen_width, screen_height)
+
 
 
 def clear_all(con, entities):

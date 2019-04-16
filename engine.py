@@ -121,16 +121,24 @@ def main():
             previous_game_state = game_state
             game_state = GameStates.SHOW_INVENTORY
 
-        if (action.get('inventory_index')
+        if (action.get('inventory_index') is not None
             and previous_game_state != game_state.PLAYER_DEAD
-            and  player.inventory.items):
+            and player.inventory.items
+            and action.get('inventory_index') < len(player.inventory.items)):
 
             item = player.inventory.items[action.get('inventory_index')]
-            player_turn_results.extend(player.inventory.use(item))
 
+            if game_state == GameStates.SHOW_INVENTORY:
+                player_turn_results.extend(player.inventory.use(item))
+            elif game_state == GameStates.DROP_INVENTORY:
+                player_turn_results.extend(player.inventory.drop_item(item))
+
+        if action.get('drop_inventory'):
+            previous_game_state = game_state
+            game_state = GameStates.DROP_INVENTORY
 
         if action.get('exit'):
-            if game_state == GameStates.SHOW_INVENTORY:
+            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
                 game_state = previous_game_state
             else:
                 return True
@@ -143,6 +151,7 @@ def main():
             dead_entity = p_turn_res.get('dead')
             item_added  = p_turn_res.get('item_added')
             item_consumed = p_turn_res.get('consumed')
+            item_droppred = p_turn_res.get('item_dropped')
 
             if message:
                 message_log.add_message(message)
@@ -160,6 +169,10 @@ def main():
                 game_state = GameStates.ENEMY_TURN
 
             if item_consumed:
+                game_state = GameStates.ENEMY_TURN
+
+            if item_droppred:
+                entities.append(item_droppred)
                 game_state = GameStates.ENEMY_TURN
 
         if game_state == GameStates.ENEMY_TURN:
