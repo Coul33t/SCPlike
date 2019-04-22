@@ -13,4 +13,9 @@ def get_item(name, x, y):
         return Entity('Healing Potion', x, y, '!', libtcod.violet, blocks=False,
                       render_order=RenderOrder.ITEM, item=item_comp)
 
+    if name == 'ZAP':
+        item_comp = Item(use_function=cast_lightning, damage=4, max_range=5)
+        return Entity('ZAP', x, y, 'z', libtcod.yellow, blocks=False,
+                      render_order=RenderOrder.ITEM, item=item_comp)
+
     return None

@@ -45,6 +45,17 @@ class GameMap:
             if v[0] <= rand <= v[1]:
                 return get_monster(k, x, y)
 
+
+    def valid_position(self, x, y, entities):
+        if entities:
+            if not any([en for en in entities if x == en.x and y == en.y]):
+                return True
+            
+            return False
+
+        return True
+
+
     def place_entity(self, x, y, entity, entities):
         if entities:
             if not any([en for en in entities if x == en.x and y == en.y]):
@@ -84,20 +95,29 @@ class GameMap:
         if nb_items == 0:
             return
 
-        succesful = 0
+        for _ in range(nb_items):
+            # 100 try for each object
+            for _ in range(100):
+                x = randint(room.x1 + 1, room.x2 - 1)
+                y = randint(room.y1 + 1, room.y2 - 1)                
+                if self.valid_position(x, y, entities):
+                    break
 
-        # 100 try in total
-        for _ in range(1000):
-            x = randint(room.x1 + 1, room.x2 - 1)
-            y = randint(room.y1 + 1, room.y2 - 1)
-            
-            entity = get_item('Healing Potion', x, y)
+            # We couldn't place the object
+            else:
+                continue
 
-            if self.place_entity(x, y, entity, entities):
-                succesful += 1
+            item_type = randint(0, 100)
 
-            if succesful == nb_items:
-                break
+            if item_type < 5:
+                entity = get_item('Healing Potion', x, y)
+            else:
+                entity = get_item('ZAP', x, y)
+
+            self.place_entity(x, y, entity, entities)
+
+
+
 
     def populate_dungeon(self, entities):
         for room in self.rooms:

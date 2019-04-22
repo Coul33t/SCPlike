@@ -1,5 +1,7 @@
 import libtcodpy as libtcod
 
+from tools import dst_entities
+
 from rendering import RenderOrder
 
 class Entity:
@@ -37,6 +39,9 @@ class Entity:
     def move(self, dx, dy):
         self.x += dx
         self.y += dy
+
+    def distance_to(self, en):
+        return dst_entities(self, en)
 
     def move_towards(self, target, game_map, entities):
         dx = (target.x - self.x)
