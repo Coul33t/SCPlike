@@ -6,7 +6,7 @@ from rendering import RenderOrder
 
 class Entity:
 
-    def __init__(self, name, x, y, char, colour, blocks=True, render_order=RenderOrder.ACTOR, is_player=False, 
+    def __init__(self, name, x, y, char, colour, blocks=True, render_order=RenderOrder.ACTOR, is_player=False,
                 fighter=None, ai=None, item=None, inventory=None):
         self.name = name
         self.x = x
@@ -35,6 +35,9 @@ class Entity:
         if self.inventory:
             self.inventory.owner = self
 
+
+    def get_coordinates(self):
+        return (self.x, self.y)
 
     def move(self, dx, dy):
         self.x += dx
@@ -99,7 +102,7 @@ class Entity:
         if not libtcod.path_is_empty(my_path) and libtcod.path_size(my_path) < 10:
             #Find the next coordinates in the computed full path
             x, y = libtcod.path_walk(my_path, True)
-            
+
             if x or y:
                 #Set self's coordinates to the next path tile
                 self.x = x

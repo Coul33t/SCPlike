@@ -50,7 +50,7 @@ class GameMap:
         if entities:
             if not any([en for en in entities if x == en.x and y == en.y]):
                 return True
-            
+
             return False
 
         return True
@@ -61,9 +61,9 @@ class GameMap:
             if not any([en for en in entities if x == en.x and y == en.y]):
                 entities.append(entity)
                 return True
-            
+
             return False
-        
+
         entities.append(entity)
         return True
 
@@ -80,7 +80,7 @@ class GameMap:
         for _ in range(1000):
             x = randint(room.x1 + 1, room.x2 - 1)
             y = randint(room.y1 + 1, room.y2 - 1)
-            
+
             entity = self.select_entity(MONSTER_PROB, x, y)
 
             if self.place_entity(x, y, entity, entities):
@@ -99,7 +99,7 @@ class GameMap:
             # 100 try for each object
             for _ in range(100):
                 x = randint(room.x1 + 1, room.x2 - 1)
-                y = randint(room.y1 + 1, room.y2 - 1)                
+                y = randint(room.y1 + 1, room.y2 - 1)
                 if self.valid_position(x, y, entities):
                     break
 
@@ -109,10 +109,14 @@ class GameMap:
 
             item_type = randint(0, 100)
 
-            if item_type < 5:
+            if item_type < 1:
                 entity = get_item('Healing Potion', x, y)
-            else:
+            elif item_type < 2:
                 entity = get_item('ZAP', x, y)
+            elif item_type < 3:
+                entity = get_item('Wrist-mounted rocket launcher', x, y)
+            else:
+                entity = get_item('Teleporting bomb', x, y)
 
             self.place_entity(x, y, entity, entities)
 
