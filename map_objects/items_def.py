@@ -36,4 +36,11 @@ def get_item(name, x, y):
                       libtcod.light_blue, blocks=False, render_order=RenderOrder.ITEM,
                       item=item_comp)
 
+    if name == 'Confuser':
+        item_comp = Item(use_function=confuse, targeting=True,
+                         targeting_message=Message('Left-click a target, right-click to cancel', libtcod.light_cyan))
+        return Entity('Confuser', x, y, 'c',
+                      libtcod.violet, blocks=False, render_order=RenderOrder.ITEM,
+                      item=item_comp)
+
     return None

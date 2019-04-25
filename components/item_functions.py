@@ -2,6 +2,8 @@ import tcod as libtcod
 
 from tools import Point
 
+from components.ai import *
+
 from game_messages import Message
 
 def heal(*args, **kwargs):
@@ -115,5 +117,33 @@ def teleporting_bomb(*args, **kwargs):
             if libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
                 results.append({'message': Message(f'The {entity.name} gets burned for {final_damage} hit points.', libtcod.orange)})
             results.extend(entity.fighter.take_damage(final_damage))
+
+    return results
+
+def confuse(*args, **kwargs):
+    caster = args[0]
+    entities = kwargs.get('entities')
+    fov_map = kwargs.get('fov_map')
+    target_coord = Point(kwargs.get('target_coordinates'))
+
+    results = []
+
+    if not libtcod.map_is_in_fov(fov_map, target_coord.x, target_coord.y):
+        results.append({'consumed': False,
+                        'message': Message(f"You cannot target a tile you haven't explored yet.", libtcod.orange)})
+        return results
+
+    for entity in entities:
+        if entity.ai and entity.x == target_coord.x and entity.y == target_coord.y:
+            confused_ai = ConfusedAI(entity.ai, 10)
+            confused_ai.owner = entity
+            entity.ai = confused_ai
+
+            results.append({'consumed': True, 'message': Message(f"The {entity.name} starts behaving weirdly...", libtcod.violet)})
+            break
+
+    else:
+        results.append({'consumed': False, 'message': Message(f"There's no targetable entity at this location.", libtcod.orange)})
+
 
     return results

@@ -115,8 +115,10 @@ class GameMap:
                 entity = get_item('ZAP', x, y)
             elif item_type < 3:
                 entity = get_item('Wrist-mounted rocket launcher', x, y)
-            else:
+            elif item_type < 4:
                 entity = get_item('Teleporting bomb', x, y)
+            else:
+                entity = get_item('Confuser', x, y)
 
             self.place_entity(x, y, entity, entities)
 
