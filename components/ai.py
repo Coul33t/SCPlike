@@ -1,5 +1,4 @@
-import libtcodpy as libtcod
-from math import hypot
+import tcod as libtcod
 from random import randint
 
 from entity import Entity
@@ -8,13 +7,12 @@ from tools import dst_entities, Point
 
 from game_messages import Message
 
-import pdb
 
 class BasicAi:
-    def __init__(self, search_radius=10):
+    def __init__(self, search_radius=10, owner=None):
         self.search_radius = search_radius
         self.last_seen_player = (None, None)
-        self.owner = None
+        self.owner = owner
 
     def take_turn(self, target, fov_map, game_map, entities):
         results = []
@@ -34,18 +32,20 @@ class BasicAi:
                     results.extend(atk_res)
 
             else:
-                # If the player has been seen as a position in the few last turns,
-                # the monster goes there
+                # If the player has been seen as a position in the few
+                # last turns, the monster goes there
                 if self.last_seen_player != (None, None):
                     new_target = Entity('PLACEHOLDER ENTITY', self.last_seen_player[0], self.last_seen_player[1], '0', libtcod.black)
                     m.move_astar(new_target, fov_map, game_map, entities)
 
         return results
 
+
 class ConfusedAI:
-    def __init__(self, previous_ai, number_of_turns=10):
+    def __init__(self, previous_ai, number_of_turns=10, owner=None):
         self.previous_ai = previous_ai
         self.number_of_turns = number_of_turns
+        self.owner = owner
 
     def take_turn(self, target, fov_map, game_map, entities):
         results = []
@@ -53,14 +53,13 @@ class ConfusedAI:
         m = self.owner
 
         if self.number_of_turns > 0:
-            random_x = m.x + randint(0,2) - 1
-            random_y = m.y + randint(0,2) - 1
+            random_x = m.x + randint(0, 2) - 1
+            random_y = m.y + randint(0, 2) - 1
 
             if random_x != m.x and random_y != m.y:
                 m.move_towards(Point(random_x, random_y), game_map, entities)
 
             self.number_of_turns -= 1
-
 
         else:
             m.ai = self.previous_ai

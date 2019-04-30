@@ -1,8 +1,9 @@
-import libtcodpy as libtcod
+import tcod as libtcod
 
 from tools import dst_entities
 
 from rendering import RenderOrder
+
 
 class Entity:
 
@@ -34,7 +35,6 @@ class Entity:
         self.inventory = inventory
         if self.inventory:
             self.inventory.owner = self
-
 
     def get_coordinates(self):
         return (self.x, self.y)
@@ -73,9 +73,8 @@ class Entity:
             self.move(dx, 0)
 
         elif dy != 0 and not (game_map.is_blocked(self.x, self.y + dy) or
-                is_blocked_by_entity(self.x, self.y + dy, entities)):
+                              is_blocked_by_entity(self.x, self.y + dy, entities)):
             self.move(0, dy)
-
 
     def move_astar(self, target, fov_map, game_map, entities):
         fov_map_astar = fov_map

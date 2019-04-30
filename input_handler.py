@@ -11,6 +11,7 @@ MOVEMENT_KEYS = {libtcod.KEY_KP8: (0, -1),
                  libtcod.KEY_KP4: (-1, 0),
                  libtcod.KEY_KP7: (-1, -1)}
 
+
 def handle_keys(key, game_state):
     if game_state == GameStates.PLAYER_TURN:
         return handle_player_turn_keys(key)
@@ -21,6 +22,7 @@ def handle_keys(key, game_state):
     elif game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
         return handle_player_inventory_keys(key)
     return {}
+
 
 def handle_player_turn_keys(key):
     # Movement keys
@@ -52,6 +54,7 @@ def handle_player_turn_keys(key):
     # No key was pressed
     return {}
 
+
 def handle_player_dead_keys(key):
     key_char = chr(key.c)
 
@@ -66,11 +69,13 @@ def handle_player_dead_keys(key):
 
     return {}
 
+
 def handle_player_targeting(key):
     if key.vk == libtcod.KEY_ESCAPE:
         return {'exit': True}
 
     return {}
+
 
 def handle_player_inventory_keys(key):
     index = key.c - ord('a')
@@ -85,6 +90,22 @@ def handle_player_inventory_keys(key):
         return {'exit': True}
 
     return {}
+
+
+def handle_main_menu(key):
+    key_char = chr(key.c)
+
+    if key_char == 'a':
+        return {'new_game': True}
+
+    elif key_char == 'b':
+        return {'load_game': True}
+
+    elif key_char == 'c' or key.vk == libtcod.KEY_ESCAPE:
+        return {'exit': True}
+
+    return {}
+
 
 def handle_mouse(mouse):
     (mx, my) = (mouse.cx, mouse.cy)
