@@ -1,3 +1,5 @@
+import tcod as libtcod
+
 from random import randint
 
 from map_objects.tile import Tile
@@ -6,16 +8,21 @@ from map_objects.rectangle import Rect
 from map_objects.monsters_def import get_monster
 from map_objects.items_def import get_item
 
+from entity import Entity
 from rendering import RenderOrder
+from tools import Point
+from components.stairs import Stairs
+from game_messages import Message
 
-MONSTER_PROB = {'maintenance': [0, 80], 'guard': [80,100]}
+MONSTER_PROB = {'maintenance': [0, 80], 'guard': [80, 100]}
 
 class GameMap:
-    def __init__(self, width, height):
+    def __init__(self, width, height, dungeon_level=1):
         self.width = width
         self.height = height
         self.tiles = self.initialize_tiles()
         self.rooms = []
+        self.current_level = dungeon_level
 
     def initialize_tiles(self):
         tiles = [[Tile(True) for y in range(self.height)] for x in range(self.width)]
@@ -131,9 +138,11 @@ class GameMap:
             self.place_items(room, entities, 2)
 
 
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player):
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities):
         self.rooms = []
         num_rooms = 0
+
+        center_last_room = Point()
 
         for r in range(max_rooms):
             # random width and height
@@ -143,7 +152,7 @@ class GameMap:
             x = randint(0, map_width - w - 1)
             y = randint(0, map_height - h - 1)
 
-             # "Rect" class makes rectangles easier to work with
+            # "Rect" class makes rectangles easier to work with
             new_room = Rect(x, y, w, h)
 
             # run through the other rooms and see if they intersect with this one
@@ -159,6 +168,8 @@ class GameMap:
 
                 # center coordinates of new room, will be useful later
                 (new_x, new_y) = new_room.center()
+
+                center_last_room = Point(new_x, new_y)
 
                 if num_rooms == 0:
                     # this is the first room, where the player starts at
@@ -186,6 +197,25 @@ class GameMap:
                 self.rooms.append(new_room)
                 num_rooms += 1
 
+        stairs_comp = Stairs(self.current_level + 1)
+        down_stairs = Entity('Stairs', center_last_room.x, center_last_room.y,
+                             '>', libtcod.white, render_order=RenderOrder.STAIRS,
+                             stairs=stairs_comp)
+        entities.append(down_stairs)
+
+
+    def next_floor(self, player, message_log, constants):
+        self.current_level += 1
+        entities = [player]
+
+        self.tiles = self.initialize_tiles()
+        self.make_map(constants['max_rooms'], constants['room_min_size'],
+                      constants['room_max_size'], constants['map_width'],
+                      constants['map_height'], player, entities)
+
+        message_log.add_message(Message('You feel DETERMINED.', libtcod.red))
+
+        return entities
 
     def is_blocked(self, x, y):
         if self.tiles[x][y].blocked:

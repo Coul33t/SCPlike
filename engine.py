@@ -5,7 +5,7 @@ from fov_functions import initiliase_fov, recompute_fov
 from rendering import render_all, clear_all
 from game_states import GameStates
 from menus import main_menu, message_box
-from colours import *
+from colours import colours
 
 from death_functions import kill_monster, kill_player
 from game_messages import Message
@@ -34,11 +34,12 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
         if fov_recompute:
-            recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'], constants['fov_algorithm'])
+            recompute_fov(fov_map, player.x, player.y, constants['fov_radius'],
+                          constants['fov_light_walls'], constants['fov_algorithm'])
 
         render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log,
-                   constants['screen_width'], constants['screen_height'], constants['bar_width'], constants['panel_height'], constants['panel_y'], mouse, colours,
-                   game_state)
+                   constants['screen_width'], constants['screen_height'], constants['bar_width'],
+                   constants['panel_height'], constants['panel_y'], mouse, colours, game_state)
 
         fov_recompute = False
 
@@ -114,6 +115,17 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
             elif r_click:
                 player_turn_results.append({'targeting_cancelled': True})
+
+        if action.get('take_stairs') and game_state == GameStates.PLAYER_TURN:
+            for entity in entities:
+                if entity.stairs and entity.x == player.x and entity.y == player.y:
+                    entities = game_map.next_floor(player, message_log, constants)
+                    fov_map = initiliase_fov(game_map)
+                    fov_recompute = True
+                    libtcod.console_clear(con)
+                    break
+            else:
+                message_log.add_message(Message("There are no stairs here.", libtcod.yellow))
 
         if action.get('exit'):
             if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):

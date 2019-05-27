@@ -58,16 +58,22 @@ def get_constants():
 def get_game_variables(constants):
     fighter_comp = Fighter(20, 5, 5)
     inventory_comp = Inventory(10)
-    player = Entity('Player', int(constants['screen_width'] / 2), int(constants['screen_height'] / 2), '@', libtcod.white,
+    player = Entity('Player', int(constants['screen_width'] / 2),
+                    int(constants['screen_height'] / 2), '@', libtcod.white,
                     is_player=True, fighter=fighter_comp, inventory=inventory_comp)
 
     entities = [player]
 
     game_map = GameMap(constants['map_width'], constants['map_height'])
-    game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'], constants['map_width'], constants['map_height'], player)
+    game_map.make_map(constants['max_rooms'], constants['room_min_size'],
+                      constants['room_max_size'], constants['map_width'],
+                      constants['map_height'], player, entities)
+
     game_map.populate_dungeon(entities)
 
-    message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
+    message_log = MessageLog(constants['message_x'],
+                             constants['message_width'],
+                             constants['message_height'])
 
     game_state = GameStates.PLAYER_TURN
 
