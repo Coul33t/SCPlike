@@ -1,4 +1,5 @@
-__pycache__/
 .mypy_cache/
-map_objects/__pycache__/
+.vscode
+
+__pycache__/
 *.pyc
