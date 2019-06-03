@@ -8,7 +8,7 @@ from rendering import RenderOrder
 class Entity:
 
     def __init__(self, name, x, y, char, colour, blocks=True, render_order=RenderOrder.ACTOR, is_player=False,
-                 fighter=None, ai=None, item=None, inventory=None, stairs=None):
+                 fighter=None, ai=None, item=None, inventory=None, stairs=None, level=None):
         self.name = name
         self.x = x
         self.y = y
@@ -39,6 +39,10 @@ class Entity:
         self.stairs = stairs
         if self.stairs:
             self.stairs.owner = self
+
+        self.level = level
+        if self.level:
+            self.level.owner = self
 
     def get_coordinates(self):
         return (self.x, self.y)

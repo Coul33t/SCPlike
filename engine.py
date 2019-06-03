@@ -127,14 +127,33 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             else:
                 message_log.add_message(Message("There are no stairs here.", libtcod.yellow))
 
+        if action.get('level_up'):
+            if action.get('level_up') == 'hp':
+                player.fighter.max_hp += 20
+                player.fighter.hp += 20
+
+            elif action.get('level_up') == 'str':
+                player.fighter.power += 1
+
+            elif action.get('level_up') == 'def':
+                player.fighter.defense += 1
+
+            game_state = previous_game_state
+
         if action.get('exit'):
-            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
+            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN):
                 game_state = previous_game_state
+
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({'targeting_cancelled': True})
+
             else:
                 save_game(player, entities, game_map, message_log, game_state)
                 return True
+
+        if action.get('show_character_screen'):
+            previous_game_state = game_state
+            game_state = GameStates.CHARACTER_SCREEN
 
         if action.get('fullscreen'):
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
@@ -147,6 +166,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             item_droppred = p_turn_res.get('item_dropped')
             targeting = p_turn_res.get('targeting')
             targeting_cancelled = p_turn_res.get('targeting_cancelled')
+            xp = p_turn_res.get('xp_given')
 
             if message:
                 message_log.add_message(message)
@@ -181,6 +201,18 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 targeting_item = targeting
 
                 message_log.add_message(targeting_item.item.targeting_message)
+
+            if xp:
+                leveled_up = player.level.add_xp(xp)
+                message_log.add_message(Message(f'You gain {xp} experience points.'))
+
+                if leveled_up:
+                    message_log.add_message(Message(
+                        f'You feel stronger! You reached level {player.level.current_level} !',
+                        libtcod.yellow
+                    ))
+                    previous_game_state = game_state
+                    game_state = GameStates.LEVEL_UP
 
         if game_state == GameStates.ENEMY_TURN:
             for entity in entities:
