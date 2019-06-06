@@ -129,14 +129,14 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
         if action.get('level_up'):
             if action.get('level_up') == 'hp':
-                player.fighter.max_hp += 20
+                player.fighter.base_max_hp += 20
                 player.fighter.hp += 20
 
             elif action.get('level_up') == 'str':
-                player.fighter.power += 1
+                player.fighter.base_power += 1
 
             elif action.get('level_up') == 'def':
-                player.fighter.defense += 1
+                player.fighter.base_defense += 1
 
             game_state = previous_game_state
 
@@ -167,6 +167,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             targeting = p_turn_res.get('targeting')
             targeting_cancelled = p_turn_res.get('targeting_cancelled')
             xp = p_turn_res.get('xp_given')
+            equip = p_turn_res.get('equip')
 
             if message:
                 message_log.add_message(message)
@@ -188,6 +189,21 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
             if item_droppred:
                 entities.append(item_droppred)
+                game_state = GameStates.ENEMY_TURN
+
+            if equip:
+                equip_res = player.equipment.toggle_equip(equip)
+
+                for equip_result in equip_res:
+                    equipped = equip_result.get('equipped')
+                    dequipped = equip_result.get('dequipped')
+
+                    if equipped:
+                        message_log.add_message(Message('You equipped the {0}'.format(equipped.name)))
+
+                    if dequipped:
+                        message_log.add_message(Message('You dequipped the {0}'.format(dequipped.name)))
+
                 game_state = GameStates.ENEMY_TURN
 
             if targeting_cancelled:

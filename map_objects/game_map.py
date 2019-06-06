@@ -11,18 +11,32 @@ from map_objects.items_def import get_item
 from entity import Entity
 from rendering import RenderOrder
 from tools import Point
-from components.stairs import Stairs
-from game_messages import Message
 
-MONSTER_PROB = {'maintenance': [0, 80], 'guard': [80, 100]}
+from components.stairs import Stairs
+
+from game_messages import Message
+from random_utils import (random_choice_from_dict,
+                          from_dungeon_level)
+
+# TODO: use from_dungeon_level
+MONSTER_PROB = {'maintenance': 80, 'guard': 20}
+ITEM_PROB = {'Healing Potion': 50,
+             'ZAP': 10,
+             'Wrist-mounted rocket launcher': 5,
+             'Teleporting bomb': 3,
+             'Confuser': 10,
+             'Parabola': 5,
+             'Crowbar': 5,
+             'Hammer': 5}
+
 
 class GameMap:
-    def __init__(self, width, height, dungeon_level=1):
+    def __init__(self, width, height, current_level=1):
         self.width = width
         self.height = height
         self.tiles = self.initialize_tiles()
         self.rooms = []
-        self.current_level = dungeon_level
+        self.current_level = current_level
 
     def initialize_tiles(self):
         tiles = [[Tile(True) for y in range(self.height)] for x in range(self.width)]
@@ -43,15 +57,6 @@ class GameMap:
         for y in range(min(y1, y2), max(y1, y2) + 1):
             self.tiles[x][y].blocked = False
             self.tiles[x][y].block_sight = False
-
-
-    def select_entity(self, prob, x, y):
-        rand = randint(0, 100)
-
-        for k, v in prob.items():
-            if v[0] <= rand <= v[1]:
-                return get_monster(k, x, y)
-
 
     def valid_position(self, x, y, entities):
         if entities:
@@ -75,7 +80,8 @@ class GameMap:
         return True
 
 
-    def populate_room(self, room, entities, max_monsters):
+    def populate_room(self, room, entities):
+        max_monsters = from_dungeon_level([[2, 1], [3, 4], [5, 6]], self.current_level)
         nb_monsters = randint(0, max_monsters)
 
         if nb_monsters == 0:
@@ -88,7 +94,9 @@ class GameMap:
             x = randint(room.x1 + 1, room.x2 - 1)
             y = randint(room.y1 + 1, room.y2 - 1)
 
-            entity = self.select_entity(MONSTER_PROB, x, y)
+
+            monster_choice = random_choice_from_dict(MONSTER_PROB)
+            entity = get_monster(monster_choice, x, y)
 
             if self.place_entity(x, y, entity, entities):
                 succesful += 1
@@ -96,7 +104,8 @@ class GameMap:
             if succesful == nb_monsters:
                 break
 
-    def place_items(self, room, entities, max_items):
+    def place_items(self, room, entities):
+        max_items = from_dungeon_level([[1, 1], [2, 4]], self.current_level)
         nb_items = randint(0, max_items)
 
         if nb_items == 0:
@@ -114,18 +123,8 @@ class GameMap:
             else:
                 continue
 
-            item_type = randint(0, 100)
-
-            if item_type < 1:
-                entity = get_item('Healing Potion', x, y)
-            elif item_type < 2:
-                entity = get_item('ZAP', x, y)
-            elif item_type < 3:
-                entity = get_item('Wrist-mounted rocket launcher', x, y)
-            elif item_type < 4:
-                entity = get_item('Teleporting bomb', x, y)
-            else:
-                entity = get_item('Confuser', x, y)
+            item_choice = random_choice_from_dict(ITEM_PROB)
+            entity = get_item(item_choice, x, y)
 
             self.place_entity(x, y, entity, entities)
 
@@ -134,8 +133,8 @@ class GameMap:
 
     def populate_dungeon(self, entities):
         for room in self.rooms:
-            self.populate_room(room, entities, 4)
-            self.place_items(room, entities, 2)
+            self.populate_room(room, entities)
+            self.place_items(room, entities)
 
 
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities):
@@ -212,6 +211,7 @@ class GameMap:
         self.make_map(constants['max_rooms'], constants['room_min_size'],
                       constants['room_max_size'], constants['map_width'],
                       constants['map_height'], player, entities)
+        self.populate_dungeon(entities)
 
         message_log.add_message(Message('You feel DETERMINED.', libtcod.red))
 

@@ -2,13 +2,15 @@ import tcod as libtcod
 
 from tools import dst_entities
 
+from components.item import Item
 from rendering import RenderOrder
 
 
 class Entity:
 
     def __init__(self, name, x, y, char, colour, blocks=True, render_order=RenderOrder.ACTOR, is_player=False,
-                 fighter=None, ai=None, item=None, inventory=None, stairs=None, level=None):
+                 fighter=None, ai=None, item=None, inventory=None, stairs=None, level=None, equipment=None,
+                 equippable=None):
         self.name = name
         self.x = x
         self.y = y
@@ -43,6 +45,19 @@ class Entity:
         self.level = level
         if self.level:
             self.level.owner = self
+
+        self.equipment = equipment
+        if self.equipment:
+            self.equipment.owner = self
+
+        self.equippable = equippable
+        if self.equippable:
+            self.equippable.owner = self
+
+            if not self.item:
+                item = Item()
+                self.item = item
+                self.item.owner = self
 
     def get_coordinates(self):
         return (self.x, self.y)

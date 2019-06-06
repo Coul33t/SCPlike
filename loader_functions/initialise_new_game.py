@@ -4,7 +4,9 @@ from entity import Entity
 from components.fighter import Fighter
 from components.inventory import Inventory
 from components.level import Level
+from components.equipment import Equipment
 from map_objects.game_map import GameMap
+from map_objects.items_def import get_item
 from game_messages import MessageLog
 from game_states import GameStates
 
@@ -60,12 +62,17 @@ def get_game_variables(constants):
     fighter_comp = Fighter(20, 5, 5)
     inventory_comp = Inventory(10)
     level_comp = Level()
+    equipment_component = Equipment()
     player = Entity('Player', int(constants['screen_width'] / 2),
                     int(constants['screen_height'] / 2), '@', libtcod.white,
                     is_player=True, fighter=fighter_comp, inventory=inventory_comp,
-                    level=level_comp)
+                    level=level_comp, equipment=equipment_component)
 
     entities = [player]
+
+    weapon = get_item('Hammer', 0, 0)
+    player.inventory.add_item(weapon)
+    player.equipment.toggle_equip(weapon)
 
     game_map = GameMap(constants['map_width'], constants['map_height'])
     game_map.make_map(constants['max_rooms'], constants['room_min_size'],

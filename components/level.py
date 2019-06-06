@@ -5,6 +5,7 @@ class Level:
         self.level_up_base = level_up_base
         self.level_up_factor = level_up_factor
 
+    @property
     def xp_to_next_level(self):
         return self.level_up_base + (self.level_up_factor * (self.current_level - 1))
 
@@ -12,7 +13,8 @@ class Level:
         has_level_up = False
         self.current_xp += xp_amount
 
-        while self.current_xp > self.xp_to_next_level():
+        while self.current_xp > self.xp_to_next_level:
+            self.current_xp -= self.xp_to_next_level
             self.current_level += 1
             has_level_up = True
 
